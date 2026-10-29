@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "cobblemon_pc_collector",
+  "version": "${version}",
+  "name": "Cobblemon PC Data Collector",
+  "description": "Client-side mod to export Pokémon details (Name, Gender, IVs, Egg Groups, and more) from your Cobblemon PC and Party.",
+  "authors": [
+    "Saphal Maharjan"
+  ],
+  "contact": {
+    "homepage": "https://github.com/SaphalMaharjan0/Cobblemon-PC-Data-Collector",
+    "sources": "https://github.com/SaphalMaharjan0/Cobblemon-PC-Data-Collector",
+    "issues": "https://github.com/SaphalMaharjan0/Cobblemon-PC-Data-Collector/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/cobblemon_pc_collector/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.sapha.cobblemoncollector.CobblemonPCCollectorClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*",
+    "cobblemon": "*"
+  }
+}
