@@ -35,12 +35,16 @@ dependencies {
     // Cobblemon Fabric dependency
     modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_language_kotlin_version}"
     modImplementation "com.cobblemon:fabric:${project.cobblemon_version}"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
+    filteringCharset = "UTF-8"
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
@@ -51,6 +55,7 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.release = 21
+    it.options.encoding = "UTF-8"
 }
 
 java {
@@ -63,4 +68,8 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.base.archivesName.get()}"}
     }
+}
+
+test {
+    useJUnitPlatform()
 }

@@ -1,5 +1,6 @@
 package com.sapha.cobblemoncollector;
 
+import com.sapha.cobblemoncollector.collector.PokedexDataCollector;
 import com.sapha.cobblemoncollector.collector.PokemonDataCollector;
 import com.sapha.cobblemoncollector.command.CobblemonExportCommand;
 import net.fabricmc.api.ClientModInitializer;
@@ -24,18 +25,25 @@ public class CobblemonPCCollectorClient implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     private static KeyMapping exportKeyBinding;
+    private static KeyMapping exportDexKeyBinding;
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info("[Cobblemon PC Collector] Initializing client-side data collector...");
+        LOGGER.info("[Cobblemon PC Collector] Initializing client-side data collector (v2.0.0)...");
 
-        // 1. Register Client Commands (/collectpc and /cobbleexport)
+        // 1. Register Client Commands (/collectpc, /cobbleexport, /collectdex, /cobbledex)
         CobblemonExportCommand.register();
 
-        // 2. Register Hotkey (default: KEY_P)
+        // 2. Register Hotkeys (P for PC, O for Pokédex)
         exportKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.cobblemon_pc_collector.export",
                 GLFW.GLFW_KEY_P,
+                "category.cobblemon_pc_collector"
+        ));
+
+        exportDexKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.cobblemon_pc_collector.export_pokedex",
+                GLFW.GLFW_KEY_O,
                 "category.cobblemon_pc_collector"
         ));
 
@@ -46,9 +54,14 @@ public class CobblemonPCCollectorClient implements ClientModInitializer {
                     performQuickExport(client);
                 }
             }
+            while (exportDexKeyBinding.consumeClick()) {
+                if (client.player != null) {
+                    performQuickPokedexExport(client);
+                }
+            }
         });
 
-        LOGGER.info("[Cobblemon PC Collector] Successfully loaded! Use /collectpc or press 'P' to export data.");
+        LOGGER.info("[Cobblemon PC Collector] Successfully loaded! Use /collectpc, /collectdex, or press 'P' / 'O' to export data.");
     }
 
     private void performQuickExport(Minecraft client) {
@@ -92,6 +105,52 @@ public class CobblemonPCCollectorClient implements ClientModInitializer {
             LOGGER.error("Failed to export Pokémon data", e);
             client.player.displayClientMessage(
                     Component.literal("§c[Cobblemon Collector] Export failed: " + e.getMessage()),
+                    false
+            );
+        }
+    }
+
+    private void performQuickPokedexExport(Minecraft client) {
+        if (client.player == null) return;
+
+        client.player.displayClientMessage(
+                Component.literal("§6[Cobblemon Collector] §fExporting CAUGHT Pokédex data (JSON & CSV)..."),
+                false
+        );
+
+        try {
+            PokedexDataCollector.PokedexExportResult result = PokedexDataCollector.exportData(true, true);
+
+            if (result.totalCount() == 0) {
+                client.player.displayClientMessage(
+                        Component.literal("§e[Cobblemon Collector] §cNo caught Pokémon found in your Pokédex! Make sure your Pokédex has synced.")
+                                .withStyle(ChatFormatting.YELLOW),
+                        false
+                );
+                return;
+            }
+
+            client.player.displayClientMessage(
+                    Component.literal(String.format("§a✔ Exported §e%d §aCAUGHT Pokémon entries across §e%d §aunique species to CSV and JSON!",
+                            result.totalCount(), result.uniqueSpeciesCount())),
+                    false
+            );
+
+            if (result.csvFile() != null) {
+                File folder = result.csvFile().getParentFile();
+                MutableComponent folderLink = Component.literal("§b[Click here to open folder: " + folder.getName() + "]")
+                        .withStyle(style -> style
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, folder.getAbsolutePath()))
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Open: " + folder.getAbsolutePath())))
+                                .withUnderlined(true)
+                                .withColor(ChatFormatting.AQUA)
+                        );
+                client.player.displayClientMessage(folderLink, false);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to export Pokédex data", e);
+            client.player.displayClientMessage(
+                    Component.literal("§c[Cobblemon Collector] Pokédex export failed: " + e.getMessage()),
                     false
             );
         }

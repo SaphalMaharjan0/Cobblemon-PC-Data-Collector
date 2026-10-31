@@ -3,7 +3,7 @@
   "id": "cobblemon_pc_collector",
   "version": "${version}",
   "name": "Cobblemon PC Data Collector",
-  "description": "Client-side mod to export Pokémon details (Name, Gender, IVs, Egg Groups, and more) from your Cobblemon PC and Party.",
+  "description": "Client-side mod for Cobblemon 1.21.1. Export party/PC storage and caught Pokedex records (forms, base stats, shiny registry, IVs, egg groups) to CSV & JSON spreadsheets.",
   "authors": [
     "Saphal Maharjan"
   ],
